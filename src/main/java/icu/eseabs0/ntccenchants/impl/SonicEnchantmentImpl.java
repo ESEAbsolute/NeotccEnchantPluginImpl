@@ -36,7 +36,7 @@ public class SonicEnchantmentImpl {
     }
 
     public boolean tryTrigger(Player player, ItemStack item) {
-        int level = getEnchantmentLevel(item, NamespacedKey.fromString("neotcc:sonic"));
+        int level = getEnchantmentLevel(item, NamespacedKey.fromString("tcc:sonic"));
 //        int level = getEnchantmentLevel(item, NamespacedKey.fromString("minecraft:sharpness"));
         if (level == 0) {
             return false;
