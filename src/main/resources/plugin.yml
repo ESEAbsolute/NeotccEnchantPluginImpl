@@ -1,0 +1,8 @@
+name: NeotccEnchantPluginImpl
+version: '1.0.0'
+main: icu.eseabs0.ntccenchants.NeotccEnchantPluginImpl
+api-version: '1.21'
+prefix: [ NeotccEnchantPluginImpl ]
+load: STARTUP
+authors: [ ESEAbsolute ]
+folia-supported: true
