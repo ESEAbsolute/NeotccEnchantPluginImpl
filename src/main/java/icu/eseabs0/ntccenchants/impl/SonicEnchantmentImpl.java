@@ -6,6 +6,7 @@ import icu.eseabs0.ntccenchants.NeotccEnchantPluginImpl;
 import icu.eseabs0.ntccenchants.util.EntityRayTraceResult;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
@@ -27,7 +28,7 @@ public class SonicEnchantmentImpl {
         this.plugin = plugin;
     }
 
-    private static final Map<UUID, Map<Integer, Long>> lastSonicUse = new HashMap<>();
+    private static final Map<UUID, Long> lastSonicUse = new HashMap<>();
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
@@ -42,15 +43,11 @@ public class SonicEnchantmentImpl {
         }
 
         long now = System.currentTimeMillis();
-        Map<Integer, Long> playerMap = lastSonicUse.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>());
-        int itemId = System.identityHashCode(item);
-
-        Long lastTime = playerMap.get(itemId);
-
-        if (lastTime != null && now - lastTime < 500) { // 500ms
-            return false;
+        Long lastTime = lastSonicUse.get(player.getUniqueId());
+        if (lastTime != null && now - lastTime < 500) { // cd 500ms
+            return true;
         }
-        playerMap.put(itemId, now);
+        lastSonicUse.put(player.getUniqueId(), now);
 
         executeSonicAttack(player, level);
         return true;
