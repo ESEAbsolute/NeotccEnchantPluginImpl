@@ -11,6 +11,8 @@ import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
@@ -25,12 +27,30 @@ public class SonicEnchantmentImpl {
         this.plugin = plugin;
     }
 
+    private static final Map<UUID, Map<Integer, Long>> lastSonicUse = new HashMap<>();
+
+    @EventHandler
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        lastSonicUse.remove(event.getPlayer().getUniqueId());
+    }
+
     public boolean tryTrigger(Player player, ItemStack item) {
         int level = getEnchantmentLevel(item, NamespacedKey.fromString("neotcc:sonic"));
 //        int level = getEnchantmentLevel(item, NamespacedKey.fromString("minecraft:sharpness"));
         if (level == 0) {
             return false;
         }
+
+        long now = System.currentTimeMillis();
+        Map<Integer, Long> playerMap = lastSonicUse.computeIfAbsent(player.getUniqueId(), k -> new HashMap<>());
+        int itemId = System.identityHashCode(item);
+
+        Long lastTime = playerMap.get(itemId);
+
+        if (lastTime != null && now - lastTime < 500) { // 500ms
+            return false;
+        }
+        playerMap.put(itemId, now);
 
         executeSonicAttack(player, level);
         return true;
