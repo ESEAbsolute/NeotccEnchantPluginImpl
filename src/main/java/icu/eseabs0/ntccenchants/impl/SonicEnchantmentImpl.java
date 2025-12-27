@@ -6,14 +6,17 @@ import icu.eseabs0.ntccenchants.NeotccEnchantPluginImpl;
 import icu.eseabs0.ntccenchants.util.EntityRayTraceResult;
 import io.papermc.paper.registry.RegistryAccess;
 import io.papermc.paper.registry.RegistryKey;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.damage.DamageSource;
 import org.bukkit.damage.DamageType;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.entity.EntityShootBowEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BoundingBox;
 import org.bukkit.util.RayTraceResult;
@@ -21,7 +24,7 @@ import org.bukkit.util.Vector;
 
 import java.util.*;
 
-public class SonicEnchantmentImpl {
+public class SonicEnchantmentImpl implements Listener {
     private final NeotccEnchantPluginImpl plugin;
 
     public SonicEnchantmentImpl(NeotccEnchantPluginImpl plugin) {
@@ -29,6 +32,25 @@ public class SonicEnchantmentImpl {
     }
 
     private static final Map<UUID, Long> lastSonicUse = new HashMap<>();
+
+    @EventHandler(priority = EventPriority.NORMAL)
+    public void onShoot(EntityShootBowEvent event) {
+        if (!(event.getEntity() instanceof Player player)) {
+            return;
+        }
+
+        ItemStack bow = event.getBow();
+        if (bow == null || bow.getType() != Material.CROSSBOW) {
+            return;
+        }
+
+        boolean triggered = tryTrigger(player, bow);
+
+        if (triggered) {
+            bow.damage(1, player);
+            event.setCancelled(true);
+        }
+    }
 
     @EventHandler
     public void onPlayerQuit(PlayerQuitEvent event) {
